@@ -19,16 +19,19 @@ struct Converter
 		,negativeNumber(false)
 	{
 		CheckNotations();
-		if(!HasError())
+		if (!HasError())
+		{
+			setNumberSign(str[0]);
 			for (char digit : str)
-				if(!HasError())
+				if (!HasError())
 					inputNum.push_back(strElemToInt(digit));
+		}
 	}
 
 	void CheckNotations()
 	{
-		if ((originalNotation > 32 || originalNotation < 2)
-			|| (resultNotation > 32 || resultNotation < 2))
+		if ((originalNotation > 36 || originalNotation < 2)
+			|| (resultNotation > 36 || resultNotation < 2))
 		{
 			std::cout << "One of inputted notations is incorrect!";
 			Error();
@@ -57,18 +60,28 @@ struct Converter
 	{
 		return wasError;
 	}
+	
+	void setNumberSign(char& c)
+	{
+		if (c == '-')
+		{
+			Negative();
+			c = '0';
+		}
+		else if (c == '+')
+		{
+			c = '0';
+		}
+	}
 
 	int strElemToInt(char c)
 	{
 		if (c >= '0' && c <= '9' && (c - '0') < originalNotation) 
 			return c - '0';
-		else if (c >= 'A' && c <= 'Z' && (c - 'A' + 10) < (originalNotation))
+		else if (c >= 'A' && c <= 'Z' && (c - 'A' + 10) < originalNotation)
 			return c - 'A' + 10;
-		else if (c == '-')
-		{
-			Negative();
-			return NULL;
-		}
+		else if (c >= 'a' && c <= 'z' && (c - 'a' + 10) < originalNotation)
+			return c - 'a' + 10;
 		else
 		{
 			Error();
@@ -147,7 +160,7 @@ int main(int argc, char *argv[])
 	
 	if (IsNotationIncorrect(argv[2]) || IsNotationIncorrect(argv[3]))
 	{
-		std::cout << "One of inputted notations is incorrect!";
+		std::cout << "One of inputted notations is incorrect! [2 <= noatation <= 36]";
 		return 1;
 	}
 	
