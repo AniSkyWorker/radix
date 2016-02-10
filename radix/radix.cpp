@@ -30,7 +30,7 @@ struct Converter
 		if ((originalNotation > 32 || originalNotation < 2)
 			|| (resultNotation > 32 || resultNotation < 2))
 		{
-			perror("One of inputted notations is incorrect!");
+			std::cout << "One of inputted notations is incorrect!";
 			Error();
 		}
 
@@ -72,7 +72,7 @@ struct Converter
 		else
 		{
 			Error();
-			perror("Invalid character in number that inputted to convert!");
+			std::cout << "Invalid character in number that inputted to convert!";
 			return NULL;
 		}
 	}
@@ -88,10 +88,10 @@ struct Converter
 	int GetConvertDigit()
 	{
 		int convertDigit = 0;
-		for (std::size_t i = 0; i < inputNum.size(); i ++ )
+		for (int& digit : inputNum)
 		{
-				convertDigit = convertDigit*originalNotation + inputNum[i];
-				inputNum[i] = convertDigit / resultNotation;
+				convertDigit = convertDigit*originalNotation + digit;
+				digit = convertDigit / resultNotation;
 				convertDigit = convertDigit % resultNotation;
 		}
 		return convertDigit;
@@ -130,7 +130,7 @@ struct Converter
 bool IsNotationIncorrect(std::string notation)
 {
 	for (char chr : notation)
-		if (!(chr <= '9' && chr >= '0'))
+		if (!(chr >= '0' && chr <= '9'))
 			return true;
 
 	return false;
@@ -140,13 +140,14 @@ int main(int argc, char *argv[])
 {
 	if (argc != 4)
 	{
-		perror("Invalid number of parametrs!");
+		std::cout << "Invalid number of parametrs!" << std::endl
+			<< "Usage: <number> <originalNotation> <resultNotation>";
 		return 1;
 	}
 	
 	if (IsNotationIncorrect(argv[2]) || IsNotationIncorrect(argv[3]))
 	{
-		perror("One of inputted notations is incorrect!");
+		std::cout << "One of inputted notations is incorrect!";
 		return 1;
 	}
 	
