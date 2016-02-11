@@ -33,12 +33,13 @@ struct Converter
 		if ((originalNotation > 36 || originalNotation < 2)
 			|| (resultNotation > 36 || resultNotation < 2))
 		{
-			std::cout << "One of inputted notations is incorrect!";
+			std::cout << "One of inputted notations is incorrect! [2 <= noatation <= 36]";
 			Error();
 		}
 
 		return;
 	}
+
 	void Negative()
 	{
 		negativeNumber = true;
