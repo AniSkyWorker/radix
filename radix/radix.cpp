@@ -4,36 +4,42 @@
 #include <fstream>
 #include <iostream>
 
-struct Converter 
-{
-	std::vector<int> inputNum;
-	int originalNotation;
-	int resultNotation;
-	bool wasError;
-	bool negativeNumber;
+const int C_MAX_NOTATION = 36;
+const int C_MIN_NOTATION = 2;
 
-	Converter(std::string str, int notation, int resultNotation)
-		:originalNotation(notation)
-		,resultNotation(resultNotation)
-		,wasError(false)
-		,negativeNumber(false)
+struct SConverter 
+{
+	std::vector<int> m_inputNum;
+	int m_originalNotation;
+	int m_resultNotation;
+	bool m_wasError = false;
+	bool m_negativeNumber = false;
+
+	SConverter(std::string str, int notation, int resultNotation)
+		:m_originalNotation(notation)
+		,m_resultNotation(resultNotation)
 	{
 		CheckNotations();
+
 		if (!HasError())
 		{
-			setNumberSign(str[0]);
+			ParseNumberSign(str[0]);
 			for (char digit : str)
+			{
 				if (!HasError())
-					inputNum.push_back(strElemToInt(digit));
+				{
+					m_inputNum.push_back(StrElemToInt(digit));
+				}
+			}
 		}
 	}
 
 	void CheckNotations()
 	{
-		if ((originalNotation > 36 || originalNotation < 2)
-			|| (resultNotation > 36 || resultNotation < 2))
+		if ((m_originalNotation > C_MAX_NOTATION || m_originalNotation < C_MIN_NOTATION)
+			|| (m_resultNotation > 36 || m_resultNotation < 2))
 		{
-			std::cout << "One of inputted notations is incorrect! [2 <= noatation <= 36]";
+			std::cout << "One of inputted notations is incorrect! [2 <= notation <= 36]" <<std::endl;
 			Error();
 		}
 
@@ -42,27 +48,25 @@ struct Converter
 
 	void Negative()
 	{
-		negativeNumber = true;
-		return;
+		m_negativeNumber = true;
 	}
 
 	void Error()
 	{
-		wasError = true;
-		return;
+		m_wasError = true;
 	}
 
 	bool IsNegative() const
 	{
-		return negativeNumber;
+		return m_negativeNumber;
 	}
 
 	bool HasError() const
 	{
-		return wasError;
+		return m_wasError;
 	}
 	
-	void setNumberSign(char& c)
+	void ParseNumberSign(char& c)
 	{
 		if (c == '-')
 		{
@@ -75,23 +79,41 @@ struct Converter
 		}
 	}
 
-	int strElemToInt(char c)
+	int StrElemToInt(char chr)
 	{
-		if (c >= '0' && c <= '9' && (c - '0') < originalNotation) 
-			return c - '0';
-		else if (c >= 'A' && c <= 'Z' && (c - 'A' + 10) < originalNotation)
-			return c - 'A' + 10;
-		else if (c >= 'a' && c <= 'z' && (c - 'a' + 10) < originalNotation)
-			return c - 'a' + 10;
-		else
+		int digit;
+
+		if (chr >= '0' && chr <= '9')
 		{
-			Error();
-			std::cout << "Invalid character in number that inputted to convert!";
-			return NULL;
+			digit = chr - '0';
+
+			if (digit < m_originalNotation)
+			{
+				return digit;
+			}
 		}
+		else if (chr >= 'A' && chr <= 'Z')
+		{
+			digit = chr - 'A' + 10;
+			if (digit < m_originalNotation)
+			{
+				return digit;
+			}
+		}
+		else if (chr >= 'a' && chr <= 'z')
+		{
+			digit = chr - 'a' + 10;
+			if (digit < m_originalNotation)
+			{
+				return digit;
+			}
+		}
+		Error();
+		std::cout << "Invalid character in number that inputted to convert!" << std::endl;
+		return 0;
 	}
 
-	char intToStrElem(int num)
+	char IntToStrElem(int num)
 	{
 		if (num >= 0 && num <= 9)
 			return num + '0';
@@ -102,50 +124,71 @@ struct Converter
 	int GetConvertDigit()
 	{
 		int convertDigit = 0;
-		for (int& digit : inputNum)
+		for (int& digit : m_inputNum)
 		{
-				convertDigit = convertDigit*originalNotation + digit;
-				digit = convertDigit / resultNotation;
-				convertDigit = convertDigit % resultNotation;
+				convertDigit = convertDigit * m_originalNotation + digit;
+				digit = convertDigit / m_resultNotation;
+				convertDigit = convertDigit % m_resultNotation;
 		}
 		return convertDigit;
 	}
 
-	bool IsZero()
+	bool IsZeroNumber() const
 	{
-		for (int digit : inputNum)
+		for (int digit : m_inputNum)
+		{
 			if (digit != 0)
+			{
 				return false;
+			}
+		}
 
 		return true;
 	}
 
-	std::string GetConvertNum()
+	std::string GetConvertNumInStr()
 	{
 		std::string result;
 
-		if (IsZero())
+		if (IsZeroNumber())
+		{
 			return result += '0';
+		}
 
 		if (IsNegative())
+		{
 			result += '-';
+		}
 
 		std::vector<int> resultNum;
-		while(!IsZero())
+		while (!IsZeroNumber())
+		{
 			resultNum.push_back(GetConvertDigit());
+		}
 
 		for (auto it = resultNum.rbegin();it != resultNum.rend(); it++)
-			result += intToStrElem(*it);
+		{
+			result += IntToStrElem(*it);
+		}
 
 		return result;
 	}
 };
 
-bool IsNotationIncorrect(std::string notation)
+bool IsNotationIncorrect(const std::string& notation)
 {
+	if (notation.length() > C_MIN_NOTATION)
+	{
+		return true;
+	}
+
 	for (char chr : notation)
+	{
 		if (!(chr >= '0' && chr <= '9'))
+		{
 			return true;
+		}
+	}
 
 	return false;
 }
@@ -154,22 +197,24 @@ int main(int argc, char *argv[])
 {
 	if (argc != 4)
 	{
-		std::cout << "Invalid number of parametrs!" << std::endl
-			<< "Usage: <number> <originalNotation> <resultNotation>";
+		std::cout << "Invalid number of arguments!" << std::endl
+			<< "Usage:radix.exe  <number> <originalNotation> <resultNotation>" << std::endl;
 		return 1;
 	}
 	
 	if (IsNotationIncorrect(argv[2]) || IsNotationIncorrect(argv[3]))
 	{
-		std::cout << "One of inputted notations is incorrect! [2 <= noatation <= 36]";
+		std::cout << "One of inputted notations is incorrect! [2 <= notation <= 36]" << std::endl;
 		return 1;
 	}
 	
-	Converter converter(argv[1], std::stoi(argv[2]), std::stoi(argv[3]));
+	SConverter converter(argv[1], std::stoi(argv[2]), std::stoi(argv[3]));
 	if (converter.HasError())
+	{
 		return 1;
+	}
 
-	std::cout << converter.GetConvertNum() << std::endl;
+	std::cout << converter.GetConvertNumInStr() << std::endl;
     return 0;
 }
 

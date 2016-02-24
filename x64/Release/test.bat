@@ -27,7 +27,7 @@ radix.exe 2 10 B
 IF NOT ERRORLEVEL 1 GOTO err
 
 REM
-radix.exe 2 33 10
+radix.exe 2 37 10
 IF NOT ERRORLEVEL 1 GOTO err
 
 REM
