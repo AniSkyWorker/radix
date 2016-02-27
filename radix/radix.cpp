@@ -3,9 +3,11 @@
 #include <string>
 #include <fstream>
 #include <iostream>
+#include <algorithm>
 
 const int C_MAX_NOTATION = 36;
 const int C_MIN_NOTATION = 2;
+const int C_MAX_NOTATION_DIGIT = 2;
 
 struct SConverter 
 {
@@ -28,7 +30,7 @@ struct SConverter
 			{
 				if (!HasError())
 				{
-					m_inputNum.push_back(StrElemToInt(digit));
+					m_inputNum.push_back(DigitToInt(digit));
 				}
 			}
 		}
@@ -79,12 +81,11 @@ struct SConverter
 		}
 	}
 
-	int StrElemToInt(char chr)
+	int DigitToInt(char chr)
 	{
-		int digit;
-
 		if (chr >= '0' && chr <= '9')
 		{
+			int digit;
 			digit = chr - '0';
 
 			if (digit < m_originalNotation)
@@ -94,6 +95,7 @@ struct SConverter
 		}
 		else if (chr >= 'A' && chr <= 'Z')
 		{
+			int digit;
 			digit = chr - 'A' + 10;
 			if (digit < m_originalNotation)
 			{
@@ -102,6 +104,7 @@ struct SConverter
 		}
 		else if (chr >= 'a' && chr <= 'z')
 		{
+			int digit;
 			digit = chr - 'a' + 10;
 			if (digit < m_originalNotation)
 			{
@@ -113,12 +116,16 @@ struct SConverter
 		return 0;
 	}
 
-	char IntToStrElem(int num)
+	char IntToDigit(int num)
 	{
 		if (num >= 0 && num <= 9)
+		{
 			return num + '0';
+		}
 		else
+		{
 			return num + 'A' - 10;
+		}
 	}
 
 	int GetConvertDigit()
@@ -135,25 +142,17 @@ struct SConverter
 
 	bool IsZeroNumber() const
 	{
-		for (int digit : m_inputNum)
-		{
-			if (digit != 0)
-			{
-				return false;
-			}
-		}
-
-		return true;
+		return std::all_of(m_inputNum.begin(), m_inputNum.end(), [](int digit) {return digit == 0;});
 	}
 
-	std::string GetConvertNumInStr()
+	std::string GetConvertedNumInStr()
 	{
-		std::string result;
-
 		if (IsZeroNumber())
 		{
-			return result += '0';
+			return "0";
 		}
+
+		std::string result;
 
 		if (IsNegative())
 		{
@@ -168,7 +167,7 @@ struct SConverter
 
 		for (auto it = resultNum.rbegin();it != resultNum.rend(); it++)
 		{
-			result += IntToStrElem(*it);
+			result += IntToDigit(*it);
 		}
 
 		return result;
@@ -177,20 +176,12 @@ struct SConverter
 
 bool IsNotationIncorrect(const std::string& notation)
 {
-	if (notation.length() > C_MIN_NOTATION)
+	if (notation.length() > C_MAX_NOTATION_DIGIT)
 	{
 		return true;
 	}
 
-	for (char chr : notation)
-	{
-		if (!(chr >= '0' && chr <= '9'))
-		{
-			return true;
-		}
-	}
-
-	return false;
+	return std::any_of(notation.begin(), notation.end(), [](char chr) {return !(chr >= '0' && chr <= '9');});
 }
 
 int main(int argc, char *argv[])
@@ -214,7 +205,7 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	std::cout << converter.GetConvertNumInStr() << std::endl;
+	std::cout << converter.GetConvertedNumInStr() << std::endl;
     return 0;
 }
 
